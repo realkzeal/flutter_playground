@@ -1,9 +1,9 @@
 // Splash Screen
 
 import 'package:flutter/material.dart';
+import 'package:flutter_playground/Widgets/button.dart';
 
-import '../utils/theme.dart';
-import 'login_pages.dart';
+import 'login_page.dart';
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -24,14 +24,11 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             Image.asset('assets/images/brinks_money.jpg'),
             const SizedBox(height:40),
-            ElevatedButton(
-              style: buttonStyle,
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
-                );
-              }, child: Text('Login', style: headline1Style,),)
-
+            Button(onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              );
+            }, text: 'Login',),
           ],
         ),
       )
