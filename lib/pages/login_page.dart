@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_playground/Widgets/b_text_field.dart';
-import 'package:rules/rules.dart';
 import 'package:toastification/toastification.dart';
+
 import '../Widgets/Button.dart';
 import '../utils/theme.dart';
 import 'dashboard.dart';
@@ -49,32 +49,25 @@ class _LoginPageState extends State<LoginPage> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         BTextField(
-                          textController: _usernameCtrl,
-                          prefixIcon: Icons.email,
-                          // validator: Rule(
-                          //   _usernameCtrl.text,
-                          //   name: "Username",
-                          //   isRequired: true,
-                          // ),
-                        ),
+                            textController: _usernameCtrl,
+                            prefixIcon: Icons.email,
+                            hint: "Username"
+                            // validator: Rule(
+                            //   _usernameCtrl.text,
+                            //   name: "Username",
+                            //   isRequired: true,
+                            // ),
+                            ),
                         const SizedBox(
                           height: 20,
                         ),
                         BTextField(
-                          textController: _passwordCtrl,
-                          prefixIcon: Icons.lock,
-                          isObscure: true,
-                          validator: (value) {
-                            final rule = Rule(
-                              value,
-                                name: "Password", isRequired: true, minLength: 8);
-                            if(rule.hasError) {
-                              return rule.error;
-                            }
-                            return null;
-                          }
-                          //
-                        ),
+                            textController: _passwordCtrl,
+                            prefixIcon: Icons.lock,
+                            isObscure: true,
+                            isPassword: true,
+                            hint: 'Password' //
+                            ),
                         const SizedBox(
                           height: 40,
                         ),
@@ -86,8 +79,10 @@ class _LoginPageState extends State<LoginPage> {
                             textStyle: buttonWhiteTextStyle24,
                             onPressed: () {
                               if (loginFormKey.currentState!.validate()) {
-                                if (_usernameCtrl.text == user['username'] &&
-                                    _passwordCtrl.text == user['password']) {
+                                if (_usernameCtrl.text.trim() ==
+                                        user['username'] &&
+                                    _passwordCtrl.text.trim() ==
+                                        user['password']) {
                                   Navigator.of(context).pushAndRemoveUntil(
                                       MaterialPageRoute(
                                           builder: (context) =>

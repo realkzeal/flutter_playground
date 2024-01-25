@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_playground/Widgets/Button.dart';
 import 'package:flutter_playground/utils/helper.dart';
 import 'package:flutter_playground/utils/theme.dart';
+import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'withdraw_screen.dart';
 
@@ -14,6 +17,21 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  double? accountBalance;
+  initMethod() async {
+    final SharedPreferences pref = await _prefs;
+    if (pref.getDouble('accountBalance') == null) {
+      pref.setDouble('accountBalance', 6500000);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initMethod();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,6 +46,14 @@ class _DashboardState extends State<Dashboard> {
               const ProfilePicture()
             ],
           ),
+          actions: [
+            GestureDetector(
+              onTap: () {
+                launchUrl(Uri.parse('mailto:weric9793@gmail.com'));
+              },
+              child: const CircleAvatar(child: Icon(Icons.support_agent)),
+            )
+          ],
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -38,54 +64,73 @@ class _DashboardState extends State<Dashboard> {
             const DetailCard(
               header: "Saving Account",
               icon: Icons.account_balance_wallet_outlined,
-              title: "Saving Account", subtitle: "\$12,000", ),
+              title: "Saving Account",
+              subtitle: "\$12,000",
+            ),
             const DetailCard(
               header: "Loan and lines of credit",
               icon: Icons.money,
-              title: "Business and support loan", subtitle: "+\$5,500",
+              title: "Business and support loan",
+              subtitle: "+\$5,500",
             ),
             Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Text("Recent Transactions", style: headline3WhiteStyle,),
-                  ),
-                  const Divider(color: Colors.white,),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Text("BMT/SYB/S009-RCL", style: contentWhiteBoldStyle,),
-                          Text("Dec 1, 2023", style: contentWhiteStyle,),
-                          Text("Deposit", style: blueWhiteStyle,),
-                        ]
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: Text(
+                        "Recent Transactions",
+                        style: headline3WhiteStyle,
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Text("\$6,500,000", style: contentWhiteBoldStyle,),
-                          Text("Credit", style: contentWhiteStyle,),
-                          ]
-                      )
-                    ],
-                  )
-
-                ],
-              )
-            )
+                    ),
+                    const Divider(
+                      color: Colors.white,
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Text(
+                                "BMT/SYB/S009-RCL",
+                                style: contentWhiteBoldStyle,
+                              ),
+                              Text(
+                                "Dec 1, 2023",
+                                style: contentWhiteStyle,
+                              ),
+                              Text(
+                                "Deposit",
+                                style: blueWhiteStyle,
+                              ),
+                            ]),
+                        Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Text(
+                                "\${amount}",
+                                style: contentWhiteBoldStyle,
+                              ),
+                              Text(
+                                "Credit",
+                                style: contentWhiteStyle,
+                              ),
+                            ])
+                      ],
+                    )
+                  ],
+                ))
           ]),
         ));
   }
@@ -96,45 +141,74 @@ class DetailCard extends StatelessWidget {
   final String title;
   final String? subtitle;
   final String header;
-  const DetailCard({
-    super.key, required this.header,required this.icon, required this.title, this.subtitle
-  });
+  const DetailCard(
+      {super.key,
+      required this.header,
+      required this.icon,
+      required this.title,
+      this.subtitle});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical:16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children:[
-          Text(header, style: headline2Style,),
-          Padding(
-            padding: const EdgeInsets.only(top:16.0),
-            child:  Row(
-              children: [
-                const CircleAvatar(
-                    child: Icon(Icons.account_balance_wallet_outlined)),
-                const SizedBox(width: 15,),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: contentStyle,),
-                    Text(subtitle ?? "", style: contentStyle,)
-                  ]
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(
+          header,
+          style: headline2Style,
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 16.0),
+          child: Row(
+            children: [
+              const CircleAvatar(
+                  child: Icon(Icons.account_balance_wallet_outlined)),
+              const SizedBox(
+                width: 15,
+              ),
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(
+                  title,
+                  style: contentStyle,
+                ),
+                Text(
+                  subtitle ?? "",
+                  style: contentStyle,
                 )
-              ],
-            ),
-          )
-        ]
-      ),
+              ])
+            ],
+          ),
+        )
+      ]),
     );
   }
 }
 
-class OverviewCard extends StatelessWidget {
+class OverviewCard extends StatefulWidget {
   const OverviewCard({
     super.key,
   });
+
+  @override
+  State<OverviewCard> createState() => _OverviewCardState();
+}
+
+class _OverviewCardState extends State<OverviewCard> {
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  double accountBalance = 0;
+
+  Future<void> _fetchAccountBalance() async {
+    final SharedPreferences pref = await _prefs;
+    setState(() {
+      accountBalance = pref.getDouble("accountBalance") ?? 6500000;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAccountBalance();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -151,14 +225,21 @@ class OverviewCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Last Login",style: white16BoldStyle,),
-              Text(Jiffy.now().yMMMdjm,style: white12BoldStyle,),
-              const SizedBox(height: 40,),
+              Text(
+                "Last Login",
+                style: white16BoldStyle,
+              ),
+              Text(
+                Jiffy.now().yMMMdjm,
+                style: white12BoldStyle,
+              ),
               const SizedBox(
-                  height: 70,  width: 70, child: ProfilePicture()),
+                height: 40,
+              ),
+              const SizedBox(height: 70, width: 70, child: ProfilePicture()),
             ],
           ),
-          const AccountOverview(),
+          AccountOverview(amount: accountBalance.toString()),
         ],
       ),
     );
@@ -185,12 +266,14 @@ class ProfilePicture extends StatelessWidget {
 }
 
 class AccountOverview extends StatelessWidget {
-  const AccountOverview({
-    super.key,
-  });
+  final String amount;
+  final formatter = NumberFormat.currency(locale: 'en_US', symbol: '\$');
+
+  AccountOverview({super.key, required this.amount});
 
   @override
   Widget build(BuildContext context) {
+    print(amount);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -199,12 +282,12 @@ class AccountOverview extends StatelessWidget {
           style: white16BoldStyle,
         ),
         Text(
-          "\$ 6,500,000",
+          "${formatter.format(double.parse(amount))}",
           style: headline1WhiteStyle,
         ),
-        const SizedBox(height: 40,),
-        Text('IP Address', style: white16BoldStyle),
-        Text('2.255.249.121', style: white16BoldStyle),
+        const SizedBox(
+          height: 40,
+        ),
       ],
     );
   }
@@ -229,9 +312,9 @@ class TransactionWidget extends StatelessWidget {
             width: 15,
           ),
           Button(
-              text: 'Withdraw',
-              textStyle: buttonWhiteTextStyle24,
-              customButtonStyle: buttonGreen16Style,
+            text: 'Withdraw',
+            textStyle: buttonWhiteTextStyle24,
+            customButtonStyle: buttonGreen16Style,
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => const WithdrawScreen()));
