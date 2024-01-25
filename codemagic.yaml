@@ -1,0 +1,10 @@
+# codemagic.yaml
+
+workflows:
+  main:
+    name: Main Workflow
+    scripts:
+      - flutter pub get
+      - flutter build ios --release
+    artifacts:
+      - build/ios/Release/*.ipa
