@@ -1,0 +1,12 @@
+{
+    "transactions": [
+        {
+            "id": "240ea866-6a37-411a-a176-d0962fe24f97",
+            "name": "transaction1",
+            "amount": 6500000,
+            "date": "2024-01-14 06:35:09.782288",
+            "type": "CREDIT",
+            "reference": "BMT/SYB/SOO9-RCL"
+        }
+    ]
+}
