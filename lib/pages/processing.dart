@@ -8,6 +8,8 @@ import 'package:flutter_playground/utils/theme.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../utils/helper.dart';
+
 class Processing extends StatefulWidget {
   final WithdrawData data;
   const Processing({super.key, required this.data});
@@ -64,10 +66,11 @@ class _ProcessingState extends State<Processing> {
       updateList();
       // cancel timer if currentIndex == textList.length -1
       if (currentIndex == textList.length - 1) {
+        saveData(widget.data);
         timer.cancel();
         var balance = pref.getDouble('accountBalance');
 
-        if (balance!= null) {
+        if (balance != null) {
           balance = balance - double.parse(widget.data.amount ?? '0.00');
           pref.setDouble('accountBalance', balance);
         }

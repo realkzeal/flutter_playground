@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_playground/Widgets/b_text_field.dart';
 import 'package:flutter_playground/pages/dashboard.dart';
 import 'package:flutter_playground/utils/theme.dart';
-import 'package:logger/logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../Widgets/button.dart';
-import 'success_screen.dart';
 
 class OtpPage extends StatefulWidget {
   final EmailOTP auth;
@@ -23,7 +21,7 @@ class _OtpPageState extends State<OtpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar:AppBar(
+        appBar: AppBar(
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -79,8 +77,8 @@ class _OtpPageState extends State<OtpPage> {
                       final isValid =
                           await widget.auth.verifyOTP(otp: _otpCtrl.text);
                       if (isValid.runtimeType == bool && isValid == true) {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const SuccessScreen()));
+                        Navigator.of(context).pushReplacement(MaterialPageRoute(
+                            builder: (context) => const Dashboard()));
                       }
                     },
                   ),

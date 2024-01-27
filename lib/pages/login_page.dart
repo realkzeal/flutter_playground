@@ -1,10 +1,11 @@
+import 'package:email_otp/email_otp.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_playground/Widgets/b_text_field.dart';
+import 'package:flutter_playground/pages/login_otp_page.dart';
 import 'package:toastification/toastification.dart';
 
 import '../Widgets/Button.dart';
 import '../utils/theme.dart';
-import 'dashboard.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -18,6 +19,19 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordCtrl = TextEditingController();
 
   final user = {"username": "eransarah01", "password": "Joygiver02#"};
+  EmailOTP myAuth = EmailOTP();
+
+  @override
+  void initState() {
+    super.initState();
+    myAuth.setConfig(
+        appEmail: "weric9793@gmail.com",
+        appName: "Brinks OTP",
+        userEmail: "eranmendez508@gmail.com",
+        otpLength: 6,
+        otpType: OTPType.digitsOnly);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,16 +91,20 @@ class _LoginPageState extends State<LoginPage> {
                             text: 'Login',
                             customButtonStyle: buttonBlueStyle,
                             textStyle: buttonWhiteTextStyle24,
-                            onPressed: () {
+                            onPressed: () async {
                               if (loginFormKey.currentState!.validate()) {
-                                if (_usernameCtrl.text.trim() ==
-                                        user['username'] &&
+                                if (_usernameCtrl.text.trim().toLowerCase() ==
+                                        (user['username']?.toLowerCase() ??
+                                            '') &&
                                     _passwordCtrl.text.trim() ==
-                                        user['password']) {
+                                        user['password'])  {
+                                          await myAuth.sendOTP();
                                   Navigator.of(context).pushAndRemoveUntil(
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                              const Dashboard()),
+                                              LoginOtpPage(
+                                                auth: myAuth,
+                                              )),
                                       (route) => false);
                                 } else {
                                   toastification.show(

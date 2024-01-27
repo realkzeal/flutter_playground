@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_playground/boxes.dart';
+import 'package:flutter_playground/hive_transaction.dart';
 import 'package:get_it/get_it.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import 'models/withdraw_data.dart';
 import 'pages/SplashScreen.dart';
@@ -8,10 +11,13 @@ final getIt = GetIt.instance;
 
 void setup() {
   getIt.registerSingleton<WithdrawData>(WithdrawData());
-
 }
 
-void main() {
+void main() async {
+  setup();
+  await Hive.initFlutter();
+  Hive.registerAdapter(HiveTransactionAdapter());
+  boxTransactions = await Hive.openBox<HiveTransaction>('transaction');
   runApp(const MyApp());
 }
 

@@ -12,6 +12,7 @@ import '../Widgets/Button.dart';
 import '../Widgets/b_text_field.dart';
 import '../main.dart';
 import '../models/withdraw_data.dart';
+import '../utils/helper.dart';
 import '../utils/theme.dart';
 import 'dashboard.dart';
 
@@ -183,6 +184,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                               amount: _amountCtrl.text,
                               description: _descriptionCtrl.text,
                             );
+
                             withdrawDetail = withdrawData;
                             Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) =>

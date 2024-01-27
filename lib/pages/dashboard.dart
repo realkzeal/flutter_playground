@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_playground/Widgets/Button.dart';
+import 'package:flutter_playground/boxes.dart';
+import 'package:flutter_playground/models/transaction.dart';
 import 'package:flutter_playground/utils/helper.dart';
 import 'package:flutter_playground/utils/theme.dart';
-import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:uuid/uuid.dart';
 
+import '../hive_transaction.dart';
 import 'withdraw_screen.dart';
 
 class Dashboard extends StatefulWidget {
@@ -19,11 +23,46 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   double? accountBalance;
+  List<Transaction> transactionList = [];
+
+  List<Transaction> getTransactionList() {
+    for (HiveTransaction transaction in boxTransactions.values) {
+      transactionList.add(Transaction(
+        id: transaction.id,
+        name: transaction.name,
+        date: transaction.date,
+        type: transaction.type,
+        amount: transaction.amount,
+        status: transaction.status,
+        reference: transaction.reference,
+      ));
+    }
+    return transactionList;
+  }
+
   initMethod() async {
     final SharedPreferences pref = await _prefs;
     if (pref.getDouble('accountBalance') == null) {
       pref.setDouble('accountBalance', 6500000);
     }
+
+    if (boxTransactions.isEmpty) {
+      final uuid = Uuid();
+      final response = await boxTransactions.add(HiveTransaction(
+          id: uuid.v4(),
+          date: DateTime.parse("2024-01-14 06:35:09.782288"),
+          amount: 6500000,
+          status: "COMPLETE",
+          reference: "BMT/SYB/SOO9-RCL",
+          type: "DEPOSIT"));
+    }
+
+    final transactions = await getTransactionList();
+
+    setState(() {
+      transactionList = transactions ?? [];
+      accountBalance = pref.getDouble('accountBalance');
+    });
   }
 
   @override
@@ -93,46 +132,73 @@ class _DashboardState extends State<Dashboard> {
                       color: Colors.white,
                     ),
                     const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Text(
-                                "BMT/SYB/S009-RCL",
-                                style: contentWhiteBoldStyle,
-                              ),
-                              Text(
-                                "Dec 1, 2023",
-                                style: contentWhiteStyle,
-                              ),
-                              Text(
-                                "Deposit",
-                                style: blueWhiteStyle,
-                              ),
-                            ]),
-                        Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Text(
-                                "\${amount}",
-                                style: contentWhiteBoldStyle,
-                              ),
-                              Text(
-                                "Credit",
-                                style: contentWhiteStyle,
-                              ),
-                            ])
-                      ],
+                    Column(
+                      children: List.generate(
+                          transactionList.length,
+                          (index) => Column(
+                                children: [
+                                  TransactionDetailCard(
+                                      transaction: transactionList[index]),
+                                  const Divider(color: Colors.white)
+                                ],
+                              )),
                     )
                   ],
                 ))
           ]),
         ));
+  }
+}
+
+class TransactionDetailCard extends StatelessWidget {
+  final Transaction transaction;
+  const TransactionDetailCard({
+    super.key,
+    required this.transaction,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                transaction.reference,
+                style: contentWhiteBoldStyle,
+              ),
+              Text(
+                formattedDate(transaction.date ?? DateTime.now()),
+                style: contentWhiteStyle,
+              ),
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: const BoxDecoration(color: Colors.white),
+                child: Text(
+                  transaction.status,
+                  style: blueWhiteStyle,
+                ),
+              ),
+            ]),
+        Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                formatCurrency(transaction.amount.toString()),
+                style: contentWhiteBoldStyle,
+              ),
+              Text(
+                transaction.type,
+                style: contentWhiteStyle,
+              ),
+            ])
+      ],
+    );
   }
 }
 
@@ -267,13 +333,11 @@ class ProfilePicture extends StatelessWidget {
 
 class AccountOverview extends StatelessWidget {
   final String amount;
-  final formatter = NumberFormat.currency(locale: 'en_US', symbol: '\$');
 
   AccountOverview({super.key, required this.amount});
 
   @override
   Widget build(BuildContext context) {
-    print(amount);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -282,7 +346,7 @@ class AccountOverview extends StatelessWidget {
           style: white16BoldStyle,
         ),
         Text(
-          "${formatter.format(double.parse(amount))}",
+          formatCurrency(amount),
           style: headline1WhiteStyle,
         ),
         const SizedBox(
